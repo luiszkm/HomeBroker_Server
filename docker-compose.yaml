@@ -2,9 +2,34 @@ version: '3'
 
 services:
   app:
-    bluid: .
+    build: .
     ports:
       - 3000:3000
     volumes:
       - .:/home/node/app
-    
+  
+  db:
+    image: bitnami/mongodb:5.0.17
+    volumes:
+      - mongodb_data:/bitnami/mongodb
+    environment:
+      MONGODB_ROOT_PASSWORD: root
+      MONGODB_REPLICA_SET_MODE: primary
+      MONGODB_REPLICA_SET_KEY: 123456
+      MONGODB_DATABASE: nest
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  my-network:
+    external: true
+# //Linux ou Mac
+# /etc/hosts
+
+# 127.0.0.1 host.docker.internal
+
+# //Windows
+# C:\Windows\system32\drivers\etc\hosts (bloco de notas como administrador)
+# 127.0.0.1 host.docker.internal

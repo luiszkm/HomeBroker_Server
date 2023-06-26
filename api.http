@@ -1,0 +1,11 @@
+GET http://localhost:3000
+
+### Create a new asset
+POST http://localhost:3000/assets
+Content-Type: application/json
+
+{
+    "id": "test",
+    "symbol": "test",
+    "price": 100
+}
