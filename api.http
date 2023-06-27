@@ -9,3 +9,7 @@ Content-Type: application/json
     "symbol": "test",
     "price": 100
 }
+
+GET  http://localhost:3000/assets
+
+GET  http://localhost:3000/wallets
