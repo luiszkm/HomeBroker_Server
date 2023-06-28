@@ -1,13 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma/prisma.service';
 import { InitTransactionDto, InputExecuteTransactionDto } from './order.dto';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, OrderType } from '@prisma/client';
+import { ClientKafka } from '@nestjs/microservices';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prsimaService: PrismaService) { }
-  initTransaction(input: InitTransactionDto) {
-    return this.prsimaService.order.create({
+  constructor(
+    private prsimaService: PrismaService,
+    @Inject("ORDERS_PUBLISHER")
+    private readonly kafkaClient: ClientKafka,
+  ) { }
+
+  all(filter: { wallet_id: string }) {
+    return this.prsimaService.order.findMany({
+      where: {
+        wallet_id: filter.wallet_id
+      },
+      include: {
+        Transactions: true,
+        Asset: {
+          select: {
+            id: true,
+            symbol: true,
+          }
+        }
+      },
+      orderBy: {
+        updated_at: 'desc'
+      }
+    });
+  }
+
+  async initTransaction(input: InitTransactionDto) {
+    const order = await this.prsimaService.order.create({
       data: {
         ...input,
         partial: input.shares,
@@ -15,6 +41,8 @@ export class OrdersService {
         version: 1
       }
     })
+    this.kafkaClient.emit('input', order)
+    return order
   }
   async executeTransaction(input: InputExecuteTransactionDto) {
     return this.prsimaService.$transaction(async (prisma) => {
@@ -26,7 +54,9 @@ export class OrdersService {
       })
       await prisma.order.update({
         where: {
-          id: input.order_id
+          id: input.order_id,
+          version: order.version
+
         }, data: {
           partial: order.partial - input.negotiated_shares,
           status: input.status,
@@ -37,7 +67,8 @@ export class OrdersService {
               shares: input.negotiated_shares,
               price: input.price
             }
-          }
+          },
+          version: { increment: 1 }
         }
       });
 
@@ -55,7 +86,8 @@ export class OrdersService {
               asset_id: order.asset_id,
               wallet_id: order.wallet_id
             }
-          }
+          },
+
         });
         if (walletAsset) {
 
@@ -64,13 +96,16 @@ export class OrdersService {
               wallet_id_asset_id: {
                 asset_id: order.asset_id,
                 wallet_id: order.wallet_id
-              }
+              },
+              version: order.version
             },
             data: {
-              shares: walletAsset.shares + input.negotiated_shares,
+              shares: order.type === OrderType.BUY ?
+                walletAsset.shares + input.negotiated_shares :
+                walletAsset.shares - input.negotiated_shares,
+              version: { increment: 1 }
             }
-          })
-
+          });
         } else {
           await prisma.walletAsset.create({
             data: {
