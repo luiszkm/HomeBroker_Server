@@ -6,19 +6,19 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 @Module({
   imports: [
     ClientsModule.register([
-      { 
-        name:"ORDERS_PUBLISHER",
+      {
+        name: 'ORDERS_PUBLISHER',
         transport: Transport.KAFKA,
-        options:{
-          client:{
-            clientId:"orders",
-            brokers:["host.docker.internal:9094"]
-          }
-        }
-      }
+        options: {
+          client: {
+            clientId: 'orders',
+            brokers: ['host.docker.internal:9094'],
+          },
+        },
+      },
     ]),
   ],
   controllers: [OrdersController],
-  providers: [OrdersService]
+  providers: [OrdersService],
 })
 export class OrdersModule {}

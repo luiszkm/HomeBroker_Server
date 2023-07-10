@@ -3,7 +3,6 @@ import { OrdersService } from './orders.service';
 import { InitTransactionDto, InputExecuteTransactionDto } from './order.dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
-
 type ExecuteTransactionMessage = {
   order_id: string;
   investor_id: string;
@@ -24,36 +23,36 @@ type ExecuteTransactionMessage = {
 
 @Controller('wallets/:wallet_id/orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) { }
+  constructor(private readonly ordersService: OrdersService) {}
 
   @Get('wallet/:wallet_id')
-  all(
-    @Param('wallet_id') wallet_id: string
-  ) {
-    return this.ordersService.all({ wallet_id })
+  all(@Param('wallet_id') wallet_id: string) {
+    return this.ordersService.all({ wallet_id });
   }
 
   @Post()
   initTransaction(
     @Param('wallet_id') wallet_id: string,
-    @Body() body: Omit<InitTransactionDto, 'wallet_id'>) {
+    @Body() body: Omit<InitTransactionDto, 'wallet_id'>,
+  ) {
     return this.ordersService.initTransaction({
       ...body,
-      wallet_id
-    })
+      wallet_id,
+    });
   }
 
   @Post('execute')
   executeTransactionRest(
     @Param('wallet_id') wallet_id: string,
-    @Body() body: InputExecuteTransactionDto) {
-    return this.ordersService.executeTransaction(body)
+    @Body() body: InputExecuteTransactionDto,
+  ) {
+    return this.ordersService.executeTransaction(body);
   }
   @MessagePattern('output')
-  async executeTransactionConsumer(@Payload() message: ExecuteTransactionMessage) {
-    const transaction = message.transactions[
-      message.transactions.length - 1
-    ]
+  async executeTransactionConsumer(
+    @Payload() message: ExecuteTransactionMessage,
+  ) {
+    const transaction = message.transactions[message.transactions.length - 1];
     await this.ordersService.executeTransaction({
       order_id: message.order_id,
       status: message.status,
@@ -66,6 +65,4 @@ export class OrdersController {
       price: transaction.price,
     });
   }
-
 }
-

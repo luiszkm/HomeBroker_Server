@@ -6,6 +6,6 @@ import { WalletAssetsController } from './wallet-assets/wallet-assets.controller
 
 @Module({
   controllers: [WalletsController, WalletAssetsController],
-  providers: [WalletsService, WalletAssetsService]
+  providers: [WalletsService, WalletAssetsService],
 })
 export class WalletsModule {}

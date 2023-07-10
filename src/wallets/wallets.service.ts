@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma/prisma.service';
 
 @Injectable()
 export class WalletsService {
-  constructor(private prismaService: PrismaService) { }
+  constructor(private prismaService: PrismaService) {}
 
   all() {
     return this.prismaService.wallet.findMany();
@@ -11,10 +11,8 @@ export class WalletsService {
   create(input: { id: string }) {
     return this.prismaService.wallet.create({
       data: {
-        id: input.id
-      }
+        id: input.id,
+      },
     });
   }
 }
-
-

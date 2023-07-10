@@ -68,13 +68,13 @@ export class WalletAssetsService {
   //       });
   //   });
 
-    // return this.prismaService.$subscribe.walletAsset({
-    //   where: {
-    //     mutation_in: ['CREATED', 'UPDATED', 'DELETED'],
-    //     node: {
-    //       wallet_id,
-    //     },
-    //   },
-    // });
+  // return this.prismaService.$subscribe.walletAsset({
+  //   where: {
+  //     mutation_in: ['CREATED', 'UPDATED', 'DELETED'],
+  //     node: {
+  //       wallet_id,
+  //     },
+  //   },
+  // });
   //}
 }

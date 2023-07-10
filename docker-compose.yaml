@@ -4,7 +4,7 @@ services:
   app:
     build: .
     ports:
-      - 3000:3000
+      - 3002:3000
       - 5555:5555
     volumes:
       - .:/home/node/app

@@ -3,16 +3,15 @@ import { AssetsService } from './assets.service';
 
 @Controller('assets')
 export class AssetsController {
-  constructor(private readonly assetsService: AssetsService) { }
+  constructor(private readonly assetsService: AssetsService) {}
 
   @Get()
-  all(){
-    return this.assetsService.all()
+  all() {
+    return this.assetsService.all();
   }
 
-
   @Post()
-  create(@Body() body: { id: string, symbol: string, price: number }) {
+  create(@Body() body: { id: string; symbol: string; price: number }) {
     return this.assetsService.create(body);
   }
 }
