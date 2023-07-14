@@ -1,7 +1,16 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  MessageEvent,
+  Param,
+  Post,
+  Sse,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { InitTransactionDto, InputExecuteTransactionDto } from './order.dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { Observable, map } from 'rxjs';
 
 type ExecuteTransactionMessage = {
   order_id: string;
@@ -25,7 +34,7 @@ type ExecuteTransactionMessage = {
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @Get('wallet/:wallet_id')
+  @Get()
   all(@Param('wallet_id') wallet_id: string) {
     return this.ordersService.all({ wallet_id });
   }
@@ -64,5 +73,15 @@ export class OrdersController {
       negotiated_shares: transaction.shares,
       price: transaction.price,
     });
+  }
+
+  @Sse('events')
+  events(@Param('wallet_id') wallet_id: string): Observable<MessageEvent> {
+    return this.ordersService.subscribeEvents(wallet_id).pipe(
+      map((event) => ({
+        type: event.event,
+        data: event.data,
+      })),
+    );
   }
 }
